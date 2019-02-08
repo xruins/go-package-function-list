@@ -8,6 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"strings"
+	"sync"
 )
 
 // ParseDir parses files in given directory and returns the list of defined functions.
@@ -16,22 +17,31 @@ func ParseDir(dirpath string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
 	}
-	filePaths := make([]string, len(files))
+	var filePaths []string
 	for _, f := range files {
-		path := singleJoiningSlash(dirpath, f.Name())
+		fn := f.Name()
+		// skip non *.go files
+		if !strings.HasSuffix(fn, ".go") {
+			continue
+		}
+		path := singleJoiningSlash(dirpath, fn)
 		filePaths = append(filePaths, path)
 	}
 
-	var funcNames [][]string
+	var funcNames []string
 	eg := errgroup.Group{}
-	for i, file := range filePaths {
-		i, file := i, file
+	mutex := &sync.Mutex{}
+	
+	for _, file := range filePaths {
+		file := file
 		eg.Go(func() error {
 			fns, err := ParseFile(file)
 			if err != nil {
 				return fmt.Errorf("failed to parse file. file: %s, err: %v", file, err)
 			}
-			funcNames[i] = fns
+			mutex.Lock()
+			funcNames = append(funcNames, fns...)
+			mutex.Unlock()
 			return nil
 		})
 
@@ -40,7 +50,7 @@ func ParseDir(dirpath string) ([]string, error) {
 	if err := eg.Wait(); err != nil {
 		return nil, err
 	}
-	return flat(funcNames), nil
+	return funcNames, nil
 }
 
 func singleJoiningSlash(a, b string) string {
@@ -53,20 +63,6 @@ func singleJoiningSlash(a, b string) string {
 		return a + "/" + b
 	}
 	return a + b
-}
-
-// flat flats slice of string slice to single string slice.
-func flat(slice [][]string) []string {
-	var entireLen int
-	for _, s := range slice {
-		entireLen += len(s)
-	}
-
-	ret := make([]string, entireLen)
-	for _, s := range slice {
-		ret = append(ret, s...)
-	}
-	return ret
 }
 
 // ParseFile parses given file and returns the list of defined functions.
