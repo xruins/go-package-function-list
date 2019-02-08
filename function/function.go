@@ -5,44 +5,83 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"golang.org/x/sync/errgroup"
+	"io/ioutil"
 	"strings"
 )
 
-// PackageMap is an alias of map[string]*ast.Package
-type PackageMap map[string]*ast.Package
-
-// ParseDir parsed specified directory and returns FuncDeclList
-func ParseDir(dir string) (map[string]*ast.Package, error) {
-	set := token.NewFileSet()
-	packs, err := parser.ParseDir(set, dir, nil, 0)
+// ParseDir parses files in given directory and returns the list of defined functions.
+func ParseDir(dirpath string) ([]string, error) {
+	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse directory. directory: %s", dir)
+		return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
 	}
-	return packs, nil
+	filePaths := make([]string, len(files))
+	for _, f := range files {
+		path := singleJoiningSlash(dirpath, f.Name())
+		filePaths = append(filePaths, path)
+	}
+
+	var funcNames [][]string
+	eg := errgroup.Group{}
+	for i, file := range filePaths {
+		i, file := i, file
+		eg.Go(func() error {
+			fns, err := ParseFile(file)
+			if err != nil {
+				return fmt.Errorf("failed to parse file. file: %s, err: %v", file, err)
+			}
+			funcNames[i] = fns
+			return nil
+		})
+
+	}
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
+	return flat(funcNames), nil
 }
 
-// ToList returns string list of function names
-func (f PackageMap) ToList() []string {
-	funcs := []*ast.FuncDecl{}
-	for _, pack := range f {
-		for _, f := range pack.Files {
-			for _, d := range f.Decls {
-				if fn, isFn := d.(*ast.FuncDecl); isFn {
-					funcs = append(funcs, fn)
-				}
-			}
+func singleJoiningSlash(a, b string) string {
+	aslash := strings.HasSuffix(a, "/")
+	bslash := strings.HasPrefix(b, "/")
+	switch {
+	case aslash && bslash:
+		return a + b[1:]
+	case !aslash && !bslash:
+		return a + "/" + b
+	}
+	return a + b
+}
+
+// flat flats slice of string slice to single string slice.
+func flat(slice [][]string) []string {
+	var entireLen int
+	for _, s := range slice {
+		entireLen += len(s)
+	}
+
+	ret := make([]string, entireLen)
+	for _, s := range slice {
+		ret = append(ret, s...)
+	}
+	return ret
+}
+
+// ParseFile parses given file and returns the list of defined functions.
+func ParseFile(filepath string) ([]string, error) {
+	set := token.NewFileSet()
+	astFile, err := parser.ParseFile(set, filepath, nil, parser.AllErrors)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse file. path: %s, err: %v", filepath, err)
+	}
+	var funcNames []string
+	for _, decl := range astFile.Decls {
+		if fn, isFn := decl.(*ast.FuncDecl); isFn {
+			funcName := fn.Name.Name
+			funcNames = append(funcNames, funcName)
 		}
 	}
-
-	var funcNames []string
-	for _, f := range funcs {
-		funcNames = append(funcNames, f.Name.Name)
-	}
-	return funcNames
-}
-
-// ToString returns string representative delimited with specified delimiter
-func (f PackageMap) ToString(delimiter string) string {
-	l := f.ToList()
-	return strings.Join(l, delimiter)
+	return funcNames, nil
 }
