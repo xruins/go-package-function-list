@@ -13,3 +13,11 @@ func Foo() {
 func Bar() {
 	fmt.Println("bar")
 }
+
+func hoge() {
+	fmt.Println("hoge")
+}
+
+func fuga() {
+	fmt.Println("fuga")
+}
