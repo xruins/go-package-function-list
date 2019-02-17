@@ -19,6 +19,12 @@ Help Options:
   -h, --help         Show this help message
 ```
 
+# Build
+
+```
+GO111MODULES=on go build ./...
+```
+
 # License
 
 MIT
