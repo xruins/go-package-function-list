@@ -15,7 +15,7 @@ import (
 func ParseDir(dirpath string) ([]string, error) {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
+		return nil, fmt.Errorf("failed to list directory. directory: %s, err: %s", dirpath, err)
 	}
 	var filePaths []string
 	for _, f := range files {
@@ -31,7 +31,7 @@ func ParseDir(dirpath string) ([]string, error) {
 	var funcNames []string
 	eg := errgroup.Group{}
 	mutex := &sync.Mutex{}
-	
+
 	for _, file := range filePaths {
 		file := file
 		eg.Go(func() error {
