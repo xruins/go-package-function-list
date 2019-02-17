@@ -4,39 +4,59 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"flag"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/xruins/go-package-function-list/function"
 )
 
-func main() {
-	dir := flag.String("dir", "", "directory to parse")
-	regex := flag.String("regex", "", "regexp to filter results")
-	suffix := flag.String("suffix", "", "if specified, show only functions has given suffix")
-	delimiter := flag.String("delimiter", " ", "delimiter among function names")
-	publicOnly := flag.Bool("public-only", false, "whether shows only public methods or not")
-	flag.Parse()
-	
-	fnames, err := function.ParseDir(*dir)
+// CmdOptions defines commanline options for jessevdk/go-flags.
+type CmdOptions struct {
+	Dir        string `short:"d" long:"dir" description:"directory to parse."`
+	Regex      string `short:"r" long:"regex" default:"" description:"regexp to filter results. it applies after filter by 'suffix'."`
+	Suffix     string `short:"s" long:"suffix" default:" " description:"suffix to filter results. it applies before filter by 'regexp'."`
+	Bound      string `short:"b" long:"delimiter" default:" " description:"delimiter among function names"`
+	PublicOnly bool   `short:"p" long:"public-only" description:"shows only public methods"`
+}
+
+func do(opts *CmdOptions) (string, error) {
+	fnames, err := function.ParseDir(opts.Dir)
 	if err != nil {
-		fmt.Println("Failed to parse package:", err)
-		os.Exit(1)
+		return "", fmt.Errorf("failed to parse package. err: %s", err)
 	}
 
-	if *regex != "" {
-		newFnames, err := function.FilterByRegexp(fnames, *regex)
+	if opts.PublicOnly {
+		fnames = function.FilterPublicMethod(fnames)
+	}
+	if opts.Suffix != "" {
+		fnames = function.FilterBySuffix(fnames, opts.Suffix)
+	}
+	if opts.Regex != "" {
+		newFnames, err := function.FilterByRegexp(fnames, opts.Regex)
 		if err != nil {
-			fmt.Println("Failed to parse regexp: ", err)
-			os.Exit(1)
+			return "", fmt.Errorf("failed to parse regexp: %s", err)
 		}
 		fnames = newFnames
 	}
-	if *suffix != "" {
-		fnames = function.FilterBySuffix(fnames, *suffix)
-	}
-	if *publicOnly {
-		fnames = function.FilterPublicMethod(fnames)
+	bounded := strings.Join(fnames, opts.Bound)
+	return bounded, nil
+}
+
+func main() {
+	var opts CmdOptions
+	parser := flags.NewParser(&opts, flags.Default)
+	if _, err := parser.Parse(); err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			os.Exit(0)
+		} else {
+			panic(err)
+		}
 	}
 
-	fmt.Println(strings.Join(fnames, *delimiter))
+	out, err := do(&opts)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(out)
+	os.Exit(0)
 }
