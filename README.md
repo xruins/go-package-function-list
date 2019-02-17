@@ -22,7 +22,7 @@ Help Options:
 # Build
 
 ```
-GO111MODULES=on go build ./...
+GO111MODULE=on go build ./...
 ```
 
 # License
