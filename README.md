@@ -1,6 +1,6 @@
 # Overview
 
-A commandline tool to get functions on specified directory.
+A command-line tool to get functions of go source file on specific directory.
 
 # Usage
 
