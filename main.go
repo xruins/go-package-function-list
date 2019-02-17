@@ -11,7 +11,7 @@ import (
 
 // CmdOptions defines commanline options for jessevdk/go-flags.
 type CmdOptions struct {
-	Dir        string `short:"d" long:"dir" description:"directory to parse."`
+	Dir        string `short:"d" long:"dir" optional:"no" description:"directory to parse."`
 	Regex      string `short:"r" long:"regex" default:"" description:"regexp to filter results. it applies after filter by 'suffix'."`
 	Suffix     string `short:"s" long:"suffix" default:" " description:"suffix to filter results. it applies before filter by 'regexp'."`
 	Bound      string `short:"b" long:"delimiter" default:" " description:"delimiter among function names"`
