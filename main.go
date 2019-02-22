@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strings"
-	"flag"
 
 	"github.com/xruins/go-package-function-list/function"
 )
@@ -15,9 +15,10 @@ func main() {
 	suffix := flag.String("suffix", "", "if specified, show only functions has given suffix")
 	delimiter := flag.String("delimiter", " ", "delimiter among function names")
 	publicOnly := flag.Bool("public-only", false, "whether shows only public methods or not")
+	recursive := flag.Bool("recursive", false, "parses directory recursively")
 	flag.Parse()
-	
-	fnames, err := function.ParseDir(*dir)
+
+	fnames, err := function.ParseDir(*dir, *recursive)
 	if err != nil {
 		fmt.Println("Failed to parse package:", err)
 		os.Exit(1)
