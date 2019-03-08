@@ -33,7 +33,7 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	var filePaths []string
 	var files []os.FileInfo
 	if recursive {
-		err := filepath.Walk(".",
+		err := filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return err
