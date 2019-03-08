@@ -6,8 +6,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/xruins/go-package-function-list/function"
 )
+
+// CmdOptions represents command-line options for go-package-function-list
+type CmdOptions struct {
+	Dir        string `short:"d"`
+	Regex      string `short:"x" default:"" description:"directory to parse"`
+	Suffix     string `short:"s" default:"" description:"shows only functions which has given suffix if specified"`
+	Delimiter  string `short:"d" default:" " description:"delimiter among function names"`
+	PublicOnly bool   `short:"p" default:false description:"whether shows only public methods or not"`
+	Recursive  bool   `short:"r" default:false description:"parses directory recursively if true"`
+}
 
 func main() {
 	dir := flag.String("dir", "", "directory to parse")
