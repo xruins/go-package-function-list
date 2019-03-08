@@ -1,23 +1,21 @@
-package hoge
+// +build ignore
 
-import (
-	"fmt"
-)
+package hoge
 
 // Foo prints foo
 func Foo() {
-	fmt.Println("foo")
+	// nop
 }
 
 // Bar prints bar
 func Bar() {
-	fmt.Println("bar")
+	// nop
 }
 
 func hoge() {
-	fmt.Println("hoge")
+	// nop
 }
 
 func fuga() {
-	fmt.Println("fuga")
+	// nop
 }
