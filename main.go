@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jessevdk/go-flags"
+	_ "github.com/jessevdk/go-flags"
 	"github.com/xruins/go-package-function-list/function"
 )
 

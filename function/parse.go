@@ -32,9 +32,13 @@ func filterGoFiles(dirpath string, files []os.FileInfo) []string {
 func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	var filePaths []string
 	var files []os.FileInfo
+	var err error
 	if recursive {
-		err := filepath.Walk(dirpath,
+		err = filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
+				if strings.HasPrefix(".", info.Name()) {
+					return nil
+				}
 				if err != nil {
 					return err
 				}
@@ -45,12 +49,12 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 			return nil, fmt.Errorf("failed to list directory. directory: %s, err: %s", dirpath, err)
 		}
 	} else {
-		files, err := ioutil.ReadDir(dirpath)
+		files, err = ioutil.ReadDir(dirpath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
 		}
-		filePaths = filterGoFiles(dirpath, files)
 	}
+	filePaths = filterGoFiles(dirpath, files)
 
 	var funcNames []string
 	eg := errgroup.Group{}
