@@ -14,16 +14,16 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func filterGoFiles(dirpath string, files []os.FileInfo) []string {
+
+// filterGoFiles filters out non go-source file from given string slice.
+func filterGoFiles(paths []string) []string {
 	var filePaths []string
-	for _, f := range files {
-		fn := f.Name()
+	for _, p := range paths {
 		// skip non *.go files
-		if !strings.HasSuffix(fn, ".go") {
+		if !strings.HasSuffix(p, ".go") {
 			continue
 		}
-		path := singleJoiningSlash(dirpath, fn)
-		filePaths = append(filePaths, path)
+		filePaths = append(filePaths, p)
 	}
 	return filePaths
 }
@@ -36,13 +36,17 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	if recursive {
 		err = filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
+				if info.IsDir() {
+					return nil
+				}
+				// skip hidden files
 				if strings.HasPrefix(".", info.Name()) {
 					return nil
 				}
 				if err != nil {
 					return err
 				}
-				files = append(files, info)
+				filePaths = append(filePaths, path)
 				return nil
 			})
 		if err != nil {
@@ -51,16 +55,19 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	} else {
 		files, err = ioutil.ReadDir(dirpath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
+			return nil, fmt.Errorf("failed to list directory. directory: %s, err: %s", dirpath, err)
+		}
+
+		for _, f := range files {
+			filePaths = append(filePaths, singleJoiningSlash(dirpath,f.Name()))
 		}
 	}
-	filePaths = filterGoFiles(dirpath, files)
 
 	var funcNames []string
 	eg := errgroup.Group{}
 	mutex := &sync.Mutex{}
 
-	for _, file := range filePaths {
+	for _, file := range filterGoFiles(filePaths) {
 		file := file
 		eg.Go(func() error {
 			fns, err := ParseFile(file)
