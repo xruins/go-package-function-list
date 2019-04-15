@@ -1,8 +1,8 @@
 package function
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -32,6 +32,7 @@ func FilterBySuffix(src []string, suffix string) []string {
 	}
 	return ret
 }
+
 // FilterPublicMethod filters string starts with capital letter from given string slice.
 func FilterPublicMethod(src []string) []string {
 	var ret []string
@@ -39,7 +40,7 @@ func FilterPublicMethod(src []string) []string {
 		firstByte := byte(s[0])
 		// 0x41: A, 0x5a: Z
 		if 0x41 <= firstByte && firstByte <= 0x5a {
-			ret = append(ret, s) 
+			ret = append(ret, s)
 		}
 	}
 	return ret

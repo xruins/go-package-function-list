@@ -14,7 +14,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-
 // filterGoFiles filters out non go-source file from given string slice.
 func filterGoFiles(paths []string) []string {
 	var filePaths []string
@@ -59,7 +58,7 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 		}
 
 		for _, f := range files {
-			filePaths = append(filePaths, singleJoiningSlash(dirpath,f.Name()))
+			filePaths = append(filePaths, singleJoiningSlash(dirpath, f.Name()))
 		}
 	}
 
