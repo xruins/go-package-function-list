@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// FilterBySuffix filters the functions matches regexp from src
+// FilterByRegexp filters the functions matches regexp from src
 func FilterByRegexp(src []string, regex string) ([]string, error) {
 	r, err := regexp.Compile(regex)
 	if err != nil {
@@ -22,7 +22,7 @@ func FilterByRegexp(src []string, regex string) ([]string, error) {
 	return ret, nil
 }
 
-// FilterBySuffix filters the functions has given prefix from src
+// FilterByPrefix filters the functions has given prefix from src
 func FilterByPrefix(src []string, prefix string) []string {
 	var ret []string
 	for _, s := range src {
