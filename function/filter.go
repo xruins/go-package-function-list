@@ -26,7 +26,7 @@ func FilterByRegexp(src []string, regex string) ([]string, error) {
 func FilterByPrefix(src []string, prefix string) []string {
 	var ret []string
 	for _, s := range src {
-		if strings.HasPrefix(s, prefic) {
+		if strings.HasPrefix(s, prefix) {
 			ret = append(ret, s)
 		}
 	}
