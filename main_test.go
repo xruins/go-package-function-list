@@ -11,12 +11,12 @@ const (
 func TestDo(t *testing.T) {
 	var cases = []struct {
 		description string
-		cmdOptions  *CmdOptions
+		cmdOptions  *cmdOptions
 		output      string
 	}{
 		{
 			description: "parses directory without any options",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:   testDataPath,
 				Bound: " ",
 			},
@@ -24,7 +24,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with public-only option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:        testDataPath,
 				PublicOnly: true,
 				Bound:      " ",
@@ -33,7 +33,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with suffix option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:    testDataPath,
 				Suffix: "Test",
 				Bound:  " ",
@@ -42,7 +42,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with regex option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:   testDataPath,
 				Regex: "Test$",
 				Bound: " ",
@@ -51,7 +51,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with regex option and suffix option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:    testDataPath,
 				Regex:  "^Foo",
 				Suffix: "Test",
@@ -61,7 +61,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with regex option and suffix option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:    testDataPath,
 				Regex:  "^Foo",
 				Suffix: "Test",
@@ -71,7 +71,7 @@ func TestDo(t *testing.T) {
 		},
 		{
 			description: "parses directory with regex option and suffix option, public-only option",
-			cmdOptions: &CmdOptions{
+			cmdOptions: &cmdOptions{
 				Dir:        testDataPath,
 				Regex:      "^[A-Za-z]",
 				PublicOnly: true,
