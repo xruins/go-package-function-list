@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// FilterBySuffix filters string matches regexp from given string slice.
+// FilterBySuffix filters the functions matches regexp from src
 func FilterByRegexp(src []string, regex string) ([]string, error) {
 	r, err := regexp.Compile(regex)
 	if err != nil {
@@ -22,7 +22,18 @@ func FilterByRegexp(src []string, regex string) ([]string, error) {
 	return ret, nil
 }
 
-// FilterBySuffix filters string has suffix from given string slice.
+// FilterBySuffix filters the functions has given prefix from src
+func FilterByPrefix(src []string, prefix string) []string {
+	var ret []string
+	for _, s := range src {
+		if strings.HasPrefix(s, prefic) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
+}
+
+// FilterBySuffix filters the functions has given suffix from src
 func FilterBySuffix(src []string, suffix string) []string {
 	var ret []string
 	for _, s := range src {
@@ -33,7 +44,7 @@ func FilterBySuffix(src []string, suffix string) []string {
 	return ret
 }
 
-// FilterPublicMethod filters string starts with capital letter from given string slice.
+// FilterPublicMethod filters public methods from src
 func FilterPublicMethod(src []string) []string {
 	var ret []string
 	for _, s := range src {
