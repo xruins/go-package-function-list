@@ -67,5 +67,7 @@ func main() {
 		fnames = function.FilterPublicMethod(fnames)
 	}
 
-	fmt.Fprintln(os.Stderr, strings.Join(fnames, opts.Delimiter))
+	if len(fnames) > 0 {
+		fmt.Println(strings.Join(fnames, opts.Delimiter))
+	}
 }
