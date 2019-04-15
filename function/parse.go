@@ -14,53 +14,55 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func filterGoFiles(dirpath string, files []os.FileInfo) []string {
+func filterGoFiles(files []string) []string {
 	var filePaths []string
 	for _, f := range files {
-		fn := f.Name()
-		// skip non *.go files
-		if !strings.HasSuffix(fn, ".go") {
+		// skip hidden files
+		if strings.HasPrefix(".", f) {
 			continue
 		}
-		path := singleJoiningSlash(dirpath, fn)
-		filePaths = append(filePaths, path)
+		// skip non *.go files
+		if !strings.HasSuffix(f, ".go") {
+			continue
+		}
+		filePaths = append(filePaths, f)
 	}
 	return filePaths
 }
 
 // ParseDir parses files in given directory and returns the list of defined functions.
 func ParseDir(dirpath string, recursive bool) ([]string, error) {
-	var filePaths []string
-	var files []os.FileInfo
+	var files []string
 	var err error
 	if recursive {
 		err = filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
+				fmt.Printf("path: %s, info: %#v\n", path, info)
 				if err != nil {
 					return err
 				}
-				if strings.HasPrefix(".", info.Name()) {
-					return nil
-				}
-				files = append(files, info)
+				files = append(files, path)
 				return nil
 			})
 		if err != nil {
 			return nil, fmt.Errorf("failed to list directory. directory: %s, err: %s", dirpath, err)
 		}
 	} else {
-		files, err = ioutil.ReadDir(dirpath)
+		fileInfos, err := ioutil.ReadDir(dirpath)
+		for _, fi := range fileInfos {
+			files = append(files, singleJoiningSlash(dirpath, fi.Name()))
+		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to list directory. directory: %s", dirpath)
 		}
 	}
-	filePaths = filterGoFiles(dirpath, files)
+	filteredFiles := filterGoFiles(files)
 
 	var funcNames []string
 	eg := errgroup.Group{}
 	mutex := &sync.Mutex{}
 
-	for _, file := range filePaths {
+	for _, file := range filteredFiles {
 		file := file
 		eg.Go(func() error {
 			fns, err := ParseFile(file)
