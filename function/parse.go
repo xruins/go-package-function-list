@@ -37,7 +37,6 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	if recursive {
 		err = filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
-				fmt.Printf("path: %s, info: %#v\n", path, info)
 				if err != nil {
 					return err
 				}
