@@ -36,11 +36,11 @@ func ParseDir(dirpath string, recursive bool) ([]string, error) {
 	if recursive {
 		err = filepath.Walk(dirpath,
 			func(path string, info os.FileInfo, err error) error {
-				if strings.HasPrefix(".", info.Name()) {
-					return nil
-				}
 				if err != nil {
 					return err
+				}
+				if strings.HasPrefix(".", info.Name()) {
+					return nil
 				}
 				files = append(files, info)
 				return nil
