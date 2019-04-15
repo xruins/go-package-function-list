@@ -22,6 +22,8 @@ type cmdOptions struct {
 func main() {
 	opts := &cmdOptions{}
 	p := flags.NewParser(opts, flags.PrintErrors)
+	p.Name = "go-package-function-list"
+	p.Usage = "[OPTIONS] DIRECTORY"
 	args, err := p.Parse()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to parse arguments. err: %s", err)
@@ -29,7 +31,7 @@ func main() {
 	}
 
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Wrong nuber of arguments.")
+		fmt.Fprintln(os.Stderr, "Wrong number of arguments.")
 		p.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
