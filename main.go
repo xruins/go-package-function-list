@@ -24,13 +24,20 @@ func main() {
 	p := flags.NewParser(opts, flags.PrintErrors)
 	args, err := p.Parse()
 	if err != nil {
-		fmt.Errorf("failed to parse arguments. err: %s", err)
+		fmt.Fprintln(os.Stderr, "failed to parse arguments. err: %s", err)
 		os.Exit(1)
 	}
 
-	fnames, err := function.ParseDir(opts.Dir, opts.Recursive)
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "Wrong nuber of arguments.")
+		p.WriteHelp(os.Stderr)
+		os.Exit(1)
+	}
+	dir := args[0]
+
+	fnames, err := function.ParseDir(dir, opts.Recursive)
 	if err != nil {
-		fmt.Println("Failed to parse package:", err)
+		fmt.Fprintln(os.Stderr, "Failed to parse package:", err)
 		os.Exit(1)
 	}
 
@@ -38,7 +45,7 @@ func main() {
 	if regex != "" {
 		newFnames, err := function.FilterByRegexp(fnames, regex)
 		if err != nil {
-			fmt.Printf("failed to filter by regexp. err: %s", err)
+			fmt.Fprintf(os.Stderr, "failed to filter by regexp. err: %s", err)
 			os.Exit(1)
 		}
 		fnames = newFnames
@@ -54,9 +61,9 @@ func main() {
 		fnames = function.FilterBySuffix(fnames, suffix)
 	}
 
-	if opts.publicOnly {
+	if opts.PublicOnly {
 		fnames = function.FilterPublicMethod(fnames)
 	}
 
-	fmt.Println(strings.Join(fnames, opts.Delimiter))
+	fmt.Fprintln(os.Stderr, strings.Join(fnames, opts.Delimiter))
 }
